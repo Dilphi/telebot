@@ -20,12 +20,10 @@ user_answers = {}
 active_users = set()
 user_current_menu = {}
 
-# Команда /start
 @bot.message_handler(commands=["start"])
 def start_handler(message: Message):
     bot.send_message(message.chat.id, "Привет! Выберите интересующий вас раздел:", reply_markup=menu_keyboard)
 
-# Обработчик кнопки "Назад"
 @bot.message_handler(func=lambda message: message.text == "🔙 Назад")
 def back_handler(message: Message):
     user_id = message.chat.id
@@ -40,7 +38,6 @@ def back_handler(message: Message):
     else:
         bot.send_message(user_id, "Невозможно вернуться назад.", reply_markup=menu_keyboard)
 
-# ...existing code...
 
 # Обработчик кнопок главного меню
 @bot.message_handler(func=lambda message: message.text in ["📖 О колледже 📖", "🎓 Профессии 🎓", "📍 Расположение 📍", "☎️ Контакты ☎️","🌐 Посетить Сайт 🌐", "🧭 Профориентация 🧭"])
@@ -78,7 +75,6 @@ def show_college_submenu(user_id):
     bot.send_message(user_id, "Выберите, что вас интересует о колледже:", reply_markup=keyboard)
     user_current_menu[user_id] = 'college'
 
-# Запуск профориентационного теста
 def start_career_test(user_id):
     active_users.add(user_id)
     user_answers[user_id] = []
@@ -96,7 +92,6 @@ def ask_career_question(user_id: int, index: int):
     else:
         finish_career_test(user_id)
 
-# Завершение теста
 def finish_career_test(user_id: int):
     result = TL.career_results.get(tuple(user_answers.get(user_id, [])), "Не удалось определить профессию, попробуйте снова!")
     bot.send_message(user_id, result, reply_markup=menu_keyboard)
@@ -121,7 +116,6 @@ def career_answer_handler(message: Message):
     user_answers[user_id].append(message.text)
     ask_career_question(user_id, len(user_answers[user_id]))
 
-# Обработчик кнопки "Назад"
 @bot.message_handler(func=lambda message: message.text == "🔙 Назад")
 def back_handler(message: Message):
     user_id = message.chat.id
