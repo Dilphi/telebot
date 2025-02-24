@@ -59,7 +59,7 @@ def menu_handler(message: Message):
     elif text == "🎓 Профессии":
         bot.send_message(user_id, TL.professions, parse_mode='Markdown')
     elif text == "📍 Расположение":
-        bot.send_message(user_id, "Улица Мустафы Озтюрка, 5а\n Бостандыкский район, Алматы\n 📍 [Открыть в картах](https://go.2gis.com/HfMFb)", parse_mode="Markdown", disable_web_page_preview=True)
+        bot.send_message(user_id, "Улица Мустафы Озтюрка, 5а\n Бостандыкский район, Алматы\n 📍 [Открыть в картах](https://go.2gis.com/HfMFb)")
     elif text == "☎️ Контакты":
         bot.send_message(user_id, TL.contact, parse_mode='Markdown', disable_web_page_preview=True)
     elif text == "🌐 Посетить Сайт":
