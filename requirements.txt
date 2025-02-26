@@ -1,3 +1,5 @@
+pyTelegramBotAPI==4.0.0
+
 aiofiles==24.1.0
 aiogram==3.17.0
 aiohappyeyeballs==2.4.6
