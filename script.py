@@ -1,7 +1,7 @@
 import telebot
 from telebot.types import Message, ReplyKeyboardMarkup, KeyboardButton
 import textlines as TL
-import server
+#import server
 import threading
 import sqlite3
 
