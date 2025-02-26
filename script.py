@@ -5,9 +5,7 @@ import server
 import threading
 import sqlite3
 
-#TOKEN = "7623890164:AAGjbXji5sklmFccgwd3Z30xZRFNS0ZkDU4" Бот колледжа который крутится на сайте
-
-TOKEN = "7826954502:AAG47IWR854AQRGXMqW9Qd18hX1IXLwqtmU" #Тестововый бот
+TOKEN = "7623890164:AAGjbXji5sklmFccgwd3Z30xZRFNS0ZkDU4"
 bot = telebot.TeleBot(TOKEN)
 
 def init_db():
