@@ -1,11 +1,12 @@
 import telebot
-from telebot.types import Message, ReplyKeyboardMarkup, KeyboardButton
+from telebot.types import Message, ReplyKeyboardMarkup, KeyboardButton 
 import textlines as TL
 #import server
 import threading
 import sqlite3
 
 TOKEN = "7623890164:AAGjbXji5sklmFccgwd3Z30xZRFNS0ZkDU4"
+
 bot = telebot.TeleBot(TOKEN)
 
 def init_db():
@@ -51,10 +52,9 @@ def save_or_update_user(user_id, username=None, full_name=None, phone=None, care
 
 menu_keyboard = ReplyKeyboardMarkup(resize_keyboard=True)
 menu_keyboard.row(KeyboardButton("🏫 Колледж"))
-menu_keyboard.row(KeyboardButton("🎓 Специальность"), KeyboardButton("📍 Адрес"))
-menu_keyboard.row(KeyboardButton("📞 Контакты/Сайт"))
-menu_keyboard.row(KeyboardButton("🧭 Подбор специальности"))
-menu_keyboard.row(KeyboardButton("📝 Записаться"))
+menu_keyboard.row(KeyboardButton("🎓 Специальность"), KeyboardButton("🧭 Подбор специальности"))
+menu_keyboard.row(KeyboardButton("📞 Контакты/Сайт"), KeyboardButton("📍 Адрес"))
+menu_keyboard.row(KeyboardButton("❓ Часто задаваемые вопросы"), KeyboardButton("📝 Записаться"))
 
 user_states = {}
 user_data = {}
@@ -63,15 +63,19 @@ STATE_WAITING_PHONE = "WAITING_PHONE"
 
 @bot.message_handler(commands=["start"])
 def start_handler(message: Message):
-    bot.send_message(
-        message.chat.id,
-        "Привет! Выберите интересующий вас раздел:",
-        reply_markup=menu_keyboard
-    )
+    photo_path = "image/image1.jpg"  # Укажи путь к фото
+
+    try:
+        with open(photo_path, "rb") as photo:
+            bot.send_photo(message.chat.id, photo, caption="👋 Доброго времени суток! Вас приветствует чатбот колледжа Международной Академии Бизнеса.")
+    except FileNotFoundError:
+        bot.send_message(message.chat.id, "Ошибка: Фото не найдено!")
+
+    bot.send_message(message.chat.id, "Какая информация вас интересует?", reply_markup=menu_keyboard)
 
 # 🔹 Функция для запуска Flask в отдельном потоке
 #def run_flask():
-    server.app.run(debug=True, host="0.0.0.0", port=5000, use_reloader=False)
+#    server.app.run(debug=True, host="0.0.0.0", port=5000, use_reloader=False)
 
 
 # Запускаем Flask в отдельном потоке
@@ -80,9 +84,10 @@ def start_handler(message: Message):
 @bot.message_handler(func=lambda m: m.text in [
     "🏫 Колледж",
     "🎓 Специальность",
-    "📍 Адрес",
-    "📞 Контакты/Сайт",
     "🧭 Подбор специальности",
+    "📞 Контакты/Сайт",
+    "📍 Адрес",
+    "❓ Часто задаваемые вопросы",
     "📝 Записаться"
 ])
 def menu_handler(message: Message):
@@ -93,13 +98,8 @@ def menu_handler(message: Message):
         show_college_submenu(user_id)
     elif text == "🎓 Специальность":
         bot.send_message(user_id, TL.professions, parse_mode='Markdown')
-    elif text == "📍 Адрес":
-        bot.send_message(
-            user_id,
-            "Улица Мустафы Озтюрка, 5а\nБостандыкский район, Алматы\n"
-            "📍 [Открыть в картах](https://go.2gis.com/HfMFb)",
-            parse_mode='Markdown'
-        )
+    elif text == "🧭 Подбор специальности":
+        start_career_test(user_id)
     elif text == "📞 Контакты/Сайт":
         bot.send_message(
             user_id,
@@ -107,8 +107,16 @@ def menu_handler(message: Message):
             parse_mode='Markdown',
             disable_web_page_preview=True
         )
-    elif text == "🧭 Подбор специальности":
-        start_career_test(user_id)
+    elif text == "📍 Адрес":
+        bot.send_message(
+            user_id,
+            "Улица Мустафы Озтюрка, 5а\nБостандыкский район, Алматы\n"
+            "📍 [Открыть в картах](https://go.2gis.com/HfMFb)",
+            parse_mode='Markdown'
+        )
+    elif text == "❓ Часто задаваемые вопросы":
+        bot.send_message(user_id, TL.faq, parse_mode='Markdown')
+    
     elif text == "📝 Записаться":
         user_states[user_id] = STATE_WAITING_NAME
         bot.send_message(
@@ -158,27 +166,56 @@ def handle_contact(message: Message):
 
 def show_college_submenu(user_id):
     kb = ReplyKeyboardMarkup(resize_keyboard=True)
-    kb.row(KeyboardButton("📅 История"))
-    kb.row(KeyboardButton("👩‍🏫 Преподаватели"))
+    kb.row(KeyboardButton("📅 О нас"))
+    kb.row(KeyboardButton("👩‍🏫 Проведение занятий"))
     kb.row(KeyboardButton("🎉 Мероприятия"))
-    kb.row(KeyboardButton("🤖 Нейросети"))
     kb.row(KeyboardButton("🔙 Назад"))
     bot.send_message(user_id, "Что хотите узнать о колледже?", reply_markup=kb)
-
+        
 @bot.message_handler(func=lambda m: m.text in [
-    "📅 История", "👩‍🏫 Преподаватели", "🎉 Мероприятия", "🤖 Нейросети"
+    "📅 О нас", "👩‍🏫 Проведение занятий", "🎉 Мероприятия"
 ])
 def college_submenu_handler(message: Message):
     text = message.text
-    if text == "📅 История":
-        bot.send_message(message.chat.id, "Дата основания и краткая история колледжа...")
-    elif text == "👩‍🏫 Преподаватели":
-        bot.send_message(message.chat.id, "Список преподавателей и их квалификации...")
-    elif text == "🎉 Мероприятия":
-        bot.send_message(message.chat.id, "Расписание внеучебной активности...")
-    elif text == "🤖 Нейросети":
-        bot.send_message(message.chat.id, "Как в колледже используют нейросети и ИИ...")
+    if text == "📅 О нас":
+        bot.send_message(message.chat.id, TL.college_history)
+    elif text == "👩‍🏫 Проведение занятий":
+        photo_paths = [
+            "image/class_work1.png",
+            "image/class_work2.png",
+            "image/class_work3.png",
+            "image/class_work4.png",
+            "image/class_work5.png"
+        ]
 
+        for path in photo_paths:
+            try:
+                with open(path, "rb") as photo:
+                    bot.send_photo(message.chat.id, photo)
+            except FileNotFoundError:
+                bot.send_message(message.chat.id, f"Ошибка: {path} не найдено!")
+        bot.send_message(message.chat.id, "наши занятия - выглядят так")
+
+    elif text == "🎉 Мероприятия":
+        # 1. Отправляем текст о мероприятии
+        bot.send_message(message.chat.id, TL.college_activities)
+
+        # 2. Отправляем фото
+        photo_path = "image/event_photo.png"  # Укажи путь к фото
+        try:
+            with open(photo_path, "rb") as photo:
+                bot.send_photo(message.chat.id, photo, caption="Фото с мероприятия 📸")
+        except FileNotFoundError:
+            bot.send_message(message.chat.id, "Ошибка: Фото не найдено!")
+
+        # 3. Отправляем видео
+        video_path = "image/bisnesWomen.mp4"
+        try:
+            with open(video_path, "rb") as video:
+                bot.send_video(message.chat.id, video, caption="Видео с мероприятия 🎥")
+        except FileNotFoundError:
+            bot.send_message(message.chat.id, "Ошибка: Видео не найдено!")
+            
 @bot.message_handler(func=lambda m: m.text == "🔙 Назад")
 def back_handler(message: Message):
     bot.send_message(
