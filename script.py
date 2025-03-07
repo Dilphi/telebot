@@ -1,11 +1,14 @@
 import telebot
+from telebot import types
 from telebot.types import Message, ReplyKeyboardMarkup, KeyboardButton 
 import textlines as TL
-#import server
+import server
 import threading
 import sqlite3
 
-TOKEN = "7623890164:AAGjbXji5sklmFccgwd3Z30xZRFNS0ZkDU4"
+#TOKEN = "7623890164:AAGjbXji5sklmFccgwd3Z30xZRFNS0ZkDU4" Бот колледжа который крутится на сайте
+
+TOKEN = "7826954502:AAG47IWR854AQRGXMqW9Qd18hX1IXLwqtmU" #Тестововый бот
 
 bot = telebot.TeleBot(TOKEN)
 
@@ -74,12 +77,12 @@ def start_handler(message: Message):
     bot.send_message(message.chat.id, "Какая информация вас интересует?", reply_markup=menu_keyboard)
 
 # 🔹 Функция для запуска Flask в отдельном потоке
-#def run_flask():
-#    server.app.run(debug=True, host="0.0.0.0", port=5000, use_reloader=False)
+def run_flask():
+    server.app.run(debug=True, host="0.0.0.0", port=5000, use_reloader=False)
 
 
 # Запускаем Flask в отдельном потоке
-#threading.Thread(target=run_flask, daemon=True).start()
+threading.Thread(target=run_flask, daemon=True).start()
 
 @bot.message_handler(func=lambda m: m.text in [
     "🏫 Колледж",
@@ -115,7 +118,7 @@ def menu_handler(message: Message):
             parse_mode='Markdown'
         )
     elif text == "❓ Часто задаваемые вопросы":
-        bot.send_message(user_id, TL.faq, parse_mode='Markdown')
+       show_question_submenu(user_id)
     
     elif text == "📝 Записаться":
         user_states[user_id] = STATE_WAITING_NAME
@@ -180,41 +183,56 @@ def college_submenu_handler(message: Message):
     if text == "📅 О нас":
         bot.send_message(message.chat.id, TL.college_history)
     elif text == "👩‍🏫 Проведение занятий":
-        photo_paths = [
-            "image/class_work1.png",
-            "image/class_work2.png",
-            "image/class_work3.png",
-            "image/class_work4.png",
-            "image/class_work5.png"
-        ]
+      
+       bot.send_message(message.chat.id, "⏳ Отправка фото...")
+      
+       photo_paths = ["image/class_work1.png", "image/class_work2.png", "image/class_work3.png","image/class_work4.png","image/class_work5.png"]  # Список путей к фото
 
-        for path in photo_paths:
-            try:
-                with open(path, "rb") as photo:
-                    bot.send_photo(message.chat.id, photo)
-            except FileNotFoundError:
-                bot.send_message(message.chat.id, f"Ошибка: {path} не найдено!")
-        bot.send_message(message.chat.id, "наши занятия - выглядят так")
+       media = []  # Создаем список медиа-объектов
+       
+       for path in photo_paths:
+           try:
+               media.append(types.InputMediaPhoto(open(path, "rb")))  # Добавляем фото в список
+           except FileNotFoundError:
+               print(f"Ошибка: Файл {path} не найден!")
+       
+       if media:
+           bot.send_media_group(message.chat.id, media)  # Отправляем группу фото
+           bot.send_message(message.chat.id, "Не скучные открытые уроки")
+       else:
+           bot.send_message(message.chat.id, "Ошибка: Нет доступных фото для отправки!")
 
     elif text == "🎉 Мероприятия":
         # 1. Отправляем текст о мероприятии
         bot.send_message(message.chat.id, TL.college_activities)
 
-        # 2. Отправляем фото
-        photo_path = "image/event_photo.png"  # Укажи путь к фото
-        try:
-            with open(photo_path, "rb") as photo:
-                bot.send_photo(message.chat.id, photo, caption="Фото с мероприятия 📸")
-        except FileNotFoundError:
-            bot.send_message(message.chat.id, "Ошибка: Фото не найдено!")
+        bot.send_message(message.chat.id, "⏳ Отправка фото...")
+      
+        photo_paths = ["image/event_photo.png", "image/event_photo2.png", "image/event_photo3.png","image/event_photo4.png","image/event_photo5.png", "image/event_photo6.png", "image/event_photo7.png", "image/event_photo8.png"]  # Список путей к фото
 
+        media = []  # Создаем список медиа-объектов
+       
+        for path in photo_paths:
+           try:
+               media.append(types.InputMediaPhoto(open(path, "rb")))  # Добавляем фото в список
+           except FileNotFoundError:
+               print(f"Ошибка: Файл {path} не найден!")
+       
+        if media:
+           bot.send_media_group(message.chat.id, media)  # Отправляем группу фото
+           bot.send_message(message.chat.id, TL.event_court)
+        else:
+           bot.send_message(message.chat.id, "Ошибка: Нет доступных фото для отправки!")
+        bot.send_message(message.chat.id, "⏳ Отправляется видео...")
+        
         # 3. Отправляем видео
         video_path = "image/bisnesWomen.mp4"
         try:
             with open(video_path, "rb") as video:
-                bot.send_video(message.chat.id, video, caption="Видео с мероприятия 🎥")
+                bot.send_video(message.chat.id, video, caption="Видео с мероприятия 💼 БИЗНЕС-ЛЕДИ\n\n 20 февраля в Алматы состоялся ежегодный форум Women in Business 2025, ставший важной платформой для обмена знаниями, опыта и вдохновения среди женщин-лидеров, предпринимателей и топ-менеджеров.\n Наши студенты проявили себя как одни из самых активных участников мероприятия, задавая вопросы, участвуя в дискуссиях и расширяя свой круг профессиональных контактов.\n Мы всегда стараемся, чтобы наши студенты посещали подобные мероприятия, ведь это уникальная возможность для их профессионального роста и развития.\n Форум посетила директор нашего колледжа Хисматуллина А.А. вместе с представителями коллектива, поддерживая инициативу женского предпринимательства и цифровой трансформации бизнеса.\n Важные темы форума — макроэкономические изменения, информационная безопасность и роль новых технологий в развитии женского предпринимательства — сделали это событие по-настоящему значимым и вдохновляющим!")
         except FileNotFoundError:
             bot.send_message(message.chat.id, "Ошибка: Видео не найдено!")
+            
             
 @bot.message_handler(func=lambda m: m.text == "🔙 Назад")
 def back_handler(message: Message):
@@ -223,6 +241,42 @@ def back_handler(message: Message):
         "Вы вернулись в главное меню.",
         reply_markup=menu_keyboard
     )
+
+# Меню вопросов
+def show_question_submenu(user_id):
+    kb = ReplyKeyboardMarkup(resize_keyboard=True)
+    kb.row(KeyboardButton("Задать вопрос"))
+    kb.row(KeyboardButton("🔙 Назад"))
+    
+    bot.send_message(user_id, TL.faq, reply_markup=kb)
+
+# Обработчик нажатия "Часто задаваемые вопросы"
+@bot.message_handler(func=lambda m: m.text == "❓ Часто задаваемые вопросы")
+def faq_handler(message):
+    show_question_submenu(message.chat.id)
+
+# Обработчик "Задать вопрос"
+@bot.message_handler(func=lambda m: m.text == "Задать вопрос")
+def question_submenu_handler(message):
+    bot.send_message(message.chat.id, TL.question)
+
+@bot.message_handler(func=lambda m: m.text == "Во сколько занятия?")
+def question_submenu_handler(message):
+    bot.send_message(message.chat.id, "Первая смена с 8:00 до 13:00\n Вторая смена с 12:00 да 17:00\n Третья смена с 10:00 до 15:00")
+
+@bot.message_handler(func=lambda m: m.text == "Какие профессии можно получить в колледже?")
+def question_submenu_handler(message):
+    bot.send_message(message.chat.id, "В колледже можно получить профессии в области менеджмента, маркетинга, логистики, банковского дела, учёта и аудита, правоведения, переводческого дела, вычислительной и информационных сетей, документационного обеспечения управления и архивоведения, эстетической косметологии.")
+
+@bot.message_handler(func=lambda m: m.text == "Куда сдавать документы?")
+def question_submenu_handler(message):
+    bot.send_message(message.chat.id, "Адрес:г. Алматы, улица Мустафы Озтюрка, 5а\nКабинет приёма документов: 1 этаж, 102 кабинет")
+
+# Обработчик "Назад" (возвращает в главное меню)
+@bot.message_handler(func=lambda m: m.text == "🔙 Назад")
+def back_handler(message):
+    bot.send_message(message.chat.id, "Вы вернулись в главное меню.", reply_markup=menu_keyboard)
+
 
 user_answers = {}
 active_users = set()
@@ -270,4 +324,4 @@ def career_answer_handler(message: Message):
 
 if __name__ == "__main__":
     bot.infinity_polling()
-    print("чурка завелась")
+    print("Бот работает")
