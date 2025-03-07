@@ -2,7 +2,7 @@ import telebot
 from telebot import types
 from telebot.types import Message, ReplyKeyboardMarkup, KeyboardButton 
 import textlines as TL
-import server
+#import server
 import threading
 import sqlite3
 
@@ -76,12 +76,12 @@ def start_handler(message: Message):
     bot.send_message(message.chat.id, "Какая информация вас интересует?", reply_markup=menu_keyboard)
 
 # 🔹 Функция для запуска Flask в отдельном потоке
-def run_flask():
-    server.app.run(debug=True, host="0.0.0.0", port=5000, use_reloader=False)
+#def run_flask():
+#    server.app.run(debug=True, host="0.0.0.0", port=5000, use_reloader=False)
 
 
 # Запускаем Flask в отдельном потоке
-threading.Thread(target=run_flask, daemon=True).start()
+#threading.Thread(target=run_flask, daemon=True).start()
 
 @bot.message_handler(func=lambda m: m.text in [
     "🏫 Колледж",
