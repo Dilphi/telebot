@@ -6,7 +6,7 @@ import textlines as TL
 import threading
 import sqlite3
 
-TOKEN = "7623890164:AAGjbXji5sklmFccgwd3Z30xZRFNS0ZkDU4"
+
 
 
 bot = telebot.TeleBot(TOKEN)
